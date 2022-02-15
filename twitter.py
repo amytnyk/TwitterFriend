@@ -4,7 +4,7 @@ from typing import List, Tuple
 from dataclasses import dataclass
 from dotenv import load_dotenv
 import requests
-
+import pathlib
 from geocode import get_coordinates
 
 
@@ -34,4 +34,4 @@ def get_friends(username: str) -> List[Friend]:
                         for user in users if "location" in user]))
 
 
-load_dotenv()
+load_dotenv(pathlib.Path(__file__).parent.resolve().name + "/.env")
