@@ -1,3 +1,5 @@
-.env
+# .env Commented for testing at UCU
 venv
 .idea
+__pycache__
+geocache

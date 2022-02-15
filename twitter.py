@@ -1,22 +1,22 @@
-from typing import List, Optional
+import os
+import random
+from typing import List, Tuple
 from dataclasses import dataclass
-from geopy.geocoders import Nominatim
-from geopy.extra.rate_limiter import RateLimiter
+from dotenv import load_dotenv
 import requests
+
+from geocode import get_coordinates
 
 
 @dataclass
 class Friend:
-    latitude: float
-    longitude: float
+    location: Tuple[float, float]
     name: str
     username: str
 
 
 def make_request(url: str):
-    headers = {
-        "Authorization": "Bearer "
-    }
+    headers = {"Authorization": f"Bearer {os.getenv('BEARER')}"}
     return requests.get(url, headers=headers).json()
 
 
@@ -24,17 +24,14 @@ def get_user_id(username: str) -> str:
     return make_request(f"https://api.twitter.com/2/users/by/username/{username}")["data"]["id"]
 
 
-def get_coordinates(location: str) -> Optional[tuple[float, float]]:
-    geolocator = Nominatim(user_agent="TwitterFriend")
-    geocode = RateLimiter(geolocator.geocode)
-    location = geocode(location)
-    if location is None:
-        return None
-    return location.latitude, location.longitude
-
-
 def get_friends(username: str) -> List[Friend]:
     resp = make_request(f"https://api.twitter.com/2/users/{get_user_id(username)}/following?"
                         f"user.fields=location,name,username")
-    return [Friend(*get_coordinates(user["location"]), user["name"], user["username"])
-            for user in resp["data"] if "location" in user]
+    users_with_location = list(filter(lambda user: "location" in user, resp["data"]))
+    users = random.sample(users_with_location, min(len(users_with_location), 6))
+    return list(filter(lambda x: x.location,
+                       [Friend(get_coordinates(user["location"]), user["name"], user["username"])
+                        for user in users if "location" in user]))
+
+
+load_dotenv()

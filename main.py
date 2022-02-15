@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from twitter import get_friends
 from mapbuilder import build_map
 
@@ -10,7 +10,11 @@ def login(username):
     try:
         return build_map(get_friends(username)).get_root().render()
     except KeyError:
-        return app.send_static_file('error.html')
+        return jsonify({'ok': False, 'error': "Username not found"}), 400
+    except ConnectionError:
+        return jsonify({'ok': False, 'error': "Connection error"}), 400
+    except Exception:
+        return jsonify({'ok': False, 'error': 'Unknown error'}), 400
 
 
 @app.route('/')
