@@ -1,20 +1,30 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from twitter import get_friends
 from mapbuilder import build_map
 
 app = Flask(__name__, static_url_path='/static/', static_folder='static')
 
 
-@app.route('/map/<username>')
-def login(username):
+@app.route('/map')
+def get_map():
     try:
-        return build_map(get_friends(username)).get_root().render()
+        if 'user' in request.args and 'count' in request.args:
+            username = request.args.get('user')
+            count = request.args.get('count')
+
+            if not count.isdigit() or int(count) <= 0:
+                return jsonify({'ok': False, 'error': "Count should be positive integer"}), 400
+
+            html_map = build_map(get_friends(username, int(count))).get_root().render()
+            return jsonify({'ok': True, 'map': html_map}), 200
+        else:
+            return jsonify({'ok': False, 'error': "No user or count"}), 400
     except KeyError:
         return jsonify({'ok': False, 'error': "Username not found"}), 400
     except ConnectionError:
-        return jsonify({'ok': False, 'error': "Connection error"}), 400
+        return jsonify({'ok': False, 'error': "Connection error"}), 500
     except Exception:
-        return jsonify({'ok': False, 'error': 'Unknown error'}), 400
+        return jsonify({'ok': False, 'error': 'Server error'}), 500
 
 
 @app.route('/')
@@ -23,4 +33,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(port=80)
+    app.run(port=8080)

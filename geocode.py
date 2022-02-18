@@ -2,6 +2,7 @@ import json
 import os.path
 from typing import Optional, Dict, Tuple
 from geopy import Nominatim
+from geopy.exc import GeocoderUnavailable
 from geopy.extra.rate_limiter import RateLimiter
 
 
@@ -19,9 +20,12 @@ def save_cache():
 
 def fetch_coordinates(location: str) -> Optional[Tuple[float, float]]:
     location = geocode(location)
-    if location is None:
+    try:
+        if location is None:
+            return None
+        return location.latitude, location.longitude
+    except GeocoderUnavailable:
         return None
-    return location.latitude, location.longitude
 
 
 def get_coordinates(location: str) -> Optional[Tuple[float, float]]:

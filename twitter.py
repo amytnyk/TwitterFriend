@@ -1,5 +1,4 @@
 import os
-import random
 from typing import List, Tuple
 from dataclasses import dataclass
 from dotenv import load_dotenv
@@ -24,14 +23,17 @@ def get_user_id(username: str) -> str:
     return make_request(f"https://api.twitter.com/2/users/by/username/{username}")["data"]["id"]
 
 
-def get_friends(username: str) -> List[Friend]:
+def get_friends(username: str, count: int) -> List[Friend]:
     resp = make_request(f"https://api.twitter.com/2/users/{get_user_id(username)}/following?"
                         f"user.fields=location,name,username")
-    users_with_location = list(filter(lambda user: "location" in user, resp["data"]))
-    users = random.sample(users_with_location, min(len(users_with_location), 6))
-    return list(filter(lambda x: x.location,
-                       [Friend(get_coordinates(user["location"]), user["name"], user["username"])
-                        for user in users if "location" in user]))
+    friends = []
+    for user in list(filter(lambda u: "location" in u, resp["data"])):
+        if coords := get_coordinates(user["location"]):
+            friends.append(Friend(coords, user["name"], user["username"]))
+            if len(friends) == count:
+                break
+
+    return friends
 
 
 load_dotenv(pathlib.Path(__file__).parent.resolve().name + "/.env")

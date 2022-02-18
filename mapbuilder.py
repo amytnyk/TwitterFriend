@@ -1,5 +1,4 @@
 from typing import List
-
 from twitter import Friend
 from folium import Map, FeatureGroup, Marker, Icon
 
