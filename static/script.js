@@ -28,6 +28,13 @@ function setError(error) {
     }, 5000);
 }
 
+function updateLatestUse() {
+    fetch('/latest_use').then(async response => {
+        document.querySelector("#latest_uses").innerHTML =
+            `${await response.text()} out of 15`;
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     let iframe = document.querySelector("iframe");
     let input_box = document.querySelector(".input_box");
@@ -35,6 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let go_back_btn = document.querySelector(".go_back_btn");
 
     hide(iframe, loader, go_back_btn);
+    updateLatestUse();
+    setInterval(updateLatestUse, 1000 * 20);
 
     go_back_btn.addEventListener("click", () => {
         hide(iframe, loader, go_back_btn);
@@ -51,9 +60,10 @@ document.addEventListener("DOMContentLoaded", () => {
         hide(input_box);
 
         fetch('/map?' + new URLSearchParams({
-                'user': document.querySelector("#user_input_box").value,
-                'count': document.querySelector("#count_input_box").value
-            })).then(async response => {
+            'user': document.querySelector("#user_input_box").value,
+            'count': document.querySelector("#count_input_box").value
+        })).then(async response => {
+            updateLatestUse();
             if (response.status === 200 && response.statusText === "OK") {
                 let frame = iframe.contentWindow;
                 frame.document.open();

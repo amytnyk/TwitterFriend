@@ -31,6 +31,14 @@ h1 {
     opacity: 100% !important;
 }
 
+#latest_uses {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    font-weight: bold;
+    color: white;
+}
+
 .input_box > * {
     display: block;
     left: 0;
