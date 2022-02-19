@@ -19,6 +19,9 @@ def get_map():
             if not count.isdigit() or int(count) <= 0:
                 return jsonify({'ok': False, 'error': "Count should be positive integer"}), 400
 
+            if len(username) == 0:
+                return jsonify({'ok': False, 'error': "Username should not be empty"}), 400
+
             html_map = build_map(get_friends(username, int(count))).get_root().render()
             return jsonify({'ok': True, 'map': html_map}), 200
         else:
