@@ -54,6 +54,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (document.querySelector("#count_input_box").value <= 0) {
             setError("Count should be positive integer");
             return;
+        } else if (document.querySelector("#user_input_box").value.length === 0) {
+            setError("Username should not be empty");
+            return;
         }
 
         show(loader);
